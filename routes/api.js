@@ -170,4 +170,30 @@ router.delete('/documents/:id', async (req, res) => {
     }
 });
 
+router.put('/reports/:id/status', async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    // Validate status
+    const validStatuses = ['Received', 'Acknowledged', 'Actioned'];
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: 'Invalid status value' });
+    }
+    
+    try {
+        const report = await Report.findById(id);
+        if (!report) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
+        
+        report.status = status;
+        await report.save();
+        
+        res.status(200).json({ message: 'Report status updated successfully', report });
+    } catch (error) {
+        console.error("Error updating report status:", error);
+        res.status(500).json({ message: 'Error updating report status' });
+    }
+});
+
 module.exports = router;
